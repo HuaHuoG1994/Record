@@ -1,0 +1,84 @@
+﻿//校验是否整数
+//function IsInteger(snum) {
+//    var slen;
+//    slen = snum.length;
+//    for (i = 0; i < slen; i++) {
+//        cc = snum.charAt(i);
+//        if (cc < "0" || cc > "9") {
+//         
+//  
+//            return false;
+//        }
+//    }
+//        return true;
+//
+//}
+
+function IsInteger(snum) {
+    var strP = /^[+-]?\d*$/;
+
+
+    if (!strP.test(snum)) {
+
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+//校验是否数值(包括整数和小数)
+//function IsNumber2(snum) {			//判断是否合法数字，比如：6.1,100 合法 ；。34，100。 不合法 
+//    if (snum== "") {
+//        return true;
+//    }
+//    else {
+//        s1 = /[^0-9.]+/;
+//        if (snum.length == 1) {
+//            s2 = /[0-9]+/;
+//        }
+//        else {
+//            s2 = /[0-9]+[.]?[0-9]+/;
+//        }
+//        s3 = /[.]+\w*[.]+/;
+//        ifpoint1 = snum.substring(snum.length - 1, snum.length);
+//        ifpoint2 = snum.substring(0, 1);
+//        if (ifpoint1 == "." || ifpoint2 == ".") {
+//            return (false);
+//        }
+//        ok1 = s1.exec(snum);
+//        ok2 = s2.exec(snum);
+//        ok3 = s3.exec(snum);
+//        if ((ok1 == null) && (ok2 != null) && (ok3 == null))
+//            return true
+//        else {
+//            return false;
+//        }
+//    }
+//}
+
+function IsNumber(oNum) {
+  
+    var num_temp = oNum.replace('-', '').replace('+', '').replace(' ', '');
+    if (num_temp.length <= 0) return true;
+
+    if (!oNum) return false;
+    var strP = /^[+-]?\d+[.]?\d*$/;
+
+
+    if (!strP.test(oNum))
+    {
+     
+        return false;
+        }
+
+    try {
+        if (parseFloat(oNum) != oNum) {
+         
+            return false;
+        }
+    }
+    catch (ex) {
+        return false;
+    }
+    return true;
+}

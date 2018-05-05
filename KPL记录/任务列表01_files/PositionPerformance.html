@@ -1,0 +1,921 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0110)http://pm.topwisesz.com/Performance/PositionPerformance.aspx?ID=19e11034-d776-425a-9498-c85139873122&IsCheck=1 -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=GBK"><title>
+	员工月度考核表
+</title>
+     <script src="./jquery-1.9.1.js.下载" type="text/javascript" language="javascript"></script>
+ <script src="./layer.js.下载" type="text/javascript" language="javascript"></script><link rel="stylesheet" href="./layer.css" id="layui_layer_skinlayercss">
+ <script src="./common.js.下载" type="text/javascript" language="javascript"></script>
+<script type="text/javascript" language="javascript" src="./jquery.contextmenu.r2.js.下载"></script>
+
+<style type="text/css">
+.li {
+    font-size: 13px;
+    margin: 10px;
+}
+
+</style>
+<script type="text/javascript" language="javascript">
+//    $(document).ready(function() {
+
+//        bind();
+
+    //    });
+    var index;
+    $(document).keyup(function(e) {
+        var key = e.which;
+        if (key == 27) {
+            layer.close(index);
+        }
+    });
+    function fclose() {
+        var ind = parent.layer.getFrameIndex(window.name); //获取窗口索引
+        parent.layer.close(ind);
+    }
+    function edit(id,t,tb) {
+
+        if (tb == "E") {
+          index=  layer.open({
+                type: 2,
+                title: '修改数据',
+                shade: 0.3,
+                skin: 'layui-layer-rim', //加上边框
+                area: ['500px', '300px'],
+                content: 'EditPositionPerformance.aspx?ID=' + id + '&t=' + t//iframe的url
+            });
+        }
+        else {
+            index = layer.open({
+                type: 2,
+                title: '修改数据',
+                shade: 0.3,
+                skin: 'layui-layer-rim', //加上边框
+                area: ['600px', '410px'],
+                content: 'EditUnplanTask.aspx?ID=' + id + '&t=' + t//iframe的url
+            });
+        }
+    }
+
+    function add(id, tb) {
+        if (tb == "E") {
+            index = layer.open({
+                type: 2,
+                title: '添加指标',
+                shade: 0.3,
+                skin: 'layui-layer-rim', //加上边框
+                area: ['500px', '300px'],
+                content: 'AddPositionPerformance.aspx?ID=' + id//iframe的url
+            });
+        }
+        else {
+            index = layer.open({
+                type: 2,
+                title: '添加工作总结',
+                shade: 0.3,
+                skin: 'layui-layer-rim', //加上边框
+                area: ['600px', '410px'],
+                content: 'AddUnplanTask.aspx?ID=' + id//iframe的url
+            });
+        }
+       
+    }
+
+    function save() {
+
+        document.getElementById("btn_save2").click();
+    }
+
+    function bind() {
+        $('tr.contextMenuDemo').contextMenu('myMenu1', {
+
+            bindings: {
+                'insert': function(t) {
+                   
+                    var id = t.id;
+                    var arr = new Array();
+                    arr = id.split(",");
+                    add(arr[1], arr[3]);
+                   
+                },
+
+                'edit': function(t) {
+                   
+                    var id = t.id;
+                    var arr = new Array();
+                    arr = id.split(",");
+                    edit(arr[0], arr[2], arr[3]);
+                   
+                },
+                'delete': function(t) {
+                   
+                    if (confirm("确定要删除该数据吗？")) {
+                        var id = t.id;
+                        var arr = new Array();
+                        arr = id.split(",");
+                        if (arr[2] == "f") {
+                            msg("固定项，不能删除！");
+                            return;
+                        }
+                        $.get("PositionPerformance.aspx", { Delete: "Delete", DtsID: encodeURI(arr[0]), T_table: arr[3] },
+                        function(data) {
+                            if (data != "删除失败") {
+
+                                var tbody = t.parentNode;
+                                tbody.removeChild(t);
+                            }
+                            else {
+                                alert(data);
+                            }
+                        });
+
+
+
+                    }
+                }
+            },
+            onShowMenu: function(e, menu) {
+                $('#blank', menu).remove(); //解决IE第一个选项会缩进问题
+                if ($(e.target).parent().attr('id') == 'tableHead') {
+                    $('#edit,#delete', menu).remove();
+                }
+
+                return menu;
+            }
+        });
+    }
+
+    function Refresh(objmsg) {
+        save();
+       // $("#btn").click();
+        msg(objmsg);
+
+    }
+    function msg(obj) {
+        // layer.alert('123');
+        layer.msg(obj, {
+            time: 2000  //1.5s后自动关闭
+            // , offset: [150, 450]  //显示位置
+            // , offset: [($(window).height() - 300), ($(window).width() - 390)]
+        });
+    }
+    function score(obj) {
+        if (!IsNumber(obj.value)) {
+            obj.value = "";
+            layer.tips("只能输入数字", '#' + obj.id);
+            return;
+        }
+        sum();
+       
+      //  document.getElementById('tb_fs').value = score;
+
+    }
+    function setscore(obj) {
+        var val = obj.id.replace('DJ','DF');
+        switch (obj.value) {
+            case "S":
+                document.getElementById(val).value = "110";
+                break;
+            case "A":
+                document.getElementById(val).value = "100";
+                break;
+            case "B":
+                document.getElementById(val).value = "90";
+                break;
+            case "C":
+                document.getElementById(val).value = "70";
+                break;
+            case "D":
+                document.getElementById(val).value = "50";
+                break;
+            default:
+                obj.value = "";
+                document.getElementById(val).value = "";
+                layer.tips("只能输入S/A/B/C/D", '#' + obj.id);
+
+                break;
+        }
+        sum();
+       // lastIndexOf(searchvalue, fromindex)
+    }
+    function sum() {
+        var tb_GZZDX_DF = document.getElementById("tb_GZZDX_DF").value;
+        var tb_ZWGZYQ_DF = document.getElementById("tb_ZWGZYQ_DF").value;
+        var tb_TDXZYS_DF = document.getElementById("tb_TDXZYS_DF").value;
+        var tb_GZHLX_DF = document.getElementById("tb_GZHLX_DF").value;
+        var tb_GZJLX_DF = document.getElementById("tb_GZJLX_DF").value;
+        var fscore = 0;
+        tb_GZZDX_DF = tb_GZZDX_DF.length > 0 ? tb_GZZDX_DF : '0';
+        tb_ZWGZYQ_DF = tb_ZWGZYQ_DF.length > 0 ? tb_ZWGZYQ_DF : '0';
+        tb_TDXZYS_DF = tb_TDXZYS_DF.length > 0 ? tb_TDXZYS_DF : '0';
+        tb_GZHLX_DF = tb_GZHLX_DF.length > 0 ? tb_GZHLX_DF : '0';
+        tb_GZJLX_DF = tb_GZJLX_DF.length > 0 ? tb_GZJLX_DF : '0';
+        fscore = parseFloat(tb_GZZDX_DF) + parseFloat(tb_ZWGZYQ_DF) + parseFloat(tb_TDXZYS_DF) + parseFloat(tb_GZHLX_DF) + parseFloat(tb_GZJLX_DF);
+       // alert(tb_GZZDX_DF);
+       fscore=fscore/5;
+       document.getElementById("tb_PJDF").value = Math.round(fscore*100)/100;
+        //tb_PJDF 五项平均分
+        var tb_input = document.getElementById('GridView1').getElementsByTagName('input');
+        var fs = [];
+        var sp = [];
+        for (var i = 0; i < tb_input.length; i++) {
+            if (tb_input[i].type == 'text' && tb_input[i].id.indexOf('tb_df') > 0) {
+                fs.push(tb_input[i]);
+                // alert(fs.length);
+            }
+            else if (tb_input[i].type == 'text' && tb_input[i].id.indexOf('tb_qz') > 0) {
+                sp.push(tb_input[i]);
+            }
+        }
+
+        var score = 0;
+
+        for (var j = 0; j < sp.length; j++) {
+
+            if (fs[j].value.length > 0 && sp[j].value.length > 0) {
+                var v = sp[j].value.substring(0, sp[j].value.length - 1) * fs[j].value
+                score += v;
+            }
+        }
+        score = score / 100;
+        //        document.getElementById('lb_DF').innerHTML = Math.round(score * 100) / 100;
+        //        document.getElementById("lb_ZZDF").innerHTML = Math.round(((fscore * 0.2) + (score * 0.8))*100)/100;
+        document.getElementById('lb_df').value = Math.round(score * 100) / 100;
+        document.getElementById("lb_zzdf").value = Math.round(((fscore * 0.2) + (score * 0.8)) * 100) / 100;
+        pjfs(document.getElementById('tb_pjfs'));
+    }
+    function weight(obj) {
+        if (obj.value == "") {
+            return;
+        }
+        var val = obj.value;
+        if (val.indexOf("%") == -1) {
+            layer.tips("输入格式不正确，正确格式为整数+%", '#' + obj.id);
+            return;
+        }
+        val = val.substring(0, val.length - 1);
+        if (val.length < 1) {
+            layer.tips("输入格式不正确，正确格式为整数+%", '#' + obj.id);
+            return;
+        }
+        else if (!IsInteger(val)) {
+            layer.tips("输入格式不正确，正确格式为整数+%", '#' + obj.id);
+            return;
+        }
+        sum();
+    }
+    function al() {
+        layer.alert('还有必填项未填写');
+    }
+    function check() {
+        var t = false;
+//         var v  = document.getElementById("tb_Self_Comments").value;
+//         if (v.length < 1) {
+//             layer.tips("不能为空", '#tb_Self_Comments');
+//             return false;
+//         }
+        var tb_input = document.getElementsByTagName('input');
+        for (var i = 0; i < tb_input.length; i++) {
+            if (tb_input[i].type == 'text' && tb_input[i].value.length < 1 && tb_input[i].id.indexOf('tb_mubiao')==-1) {
+                t = false;
+               // alert("1");
+                layer.tips("不能为空", '#' + tb_input[i].id);
+                //  return false;
+                al();
+                break;
+            }
+            else {
+                t = true;
+            }
+
+        }
+        var tb_textarea = document.getElementsByTagName('textarea');
+        for (var i = 0; i < tb_textarea.length; i++) {
+            if (tb_textarea[i].value.length < 1 ) {
+                t = false;
+                // alert("1");
+                layer.tips("不能为空", '#' + tb_textarea[i].id);
+                al();
+                //  return false;
+                break;
+            }
+            else {
+                t = true;
+            }
+
+        }
+        return t;
+    }
+    function pjfs(obj) {
+        if (obj.value.length>0&&!IsNumber(obj.value)) {
+            obj.value = "";
+            layer.tips("只能输入数字", '#' + obj.id);
+            return;
+        }
+        else
+        {
+            var tb4 = document.getElementById('tb_4').value;
+            var tb = document.getElementById('lb_zzdf').value;
+            if (obj.value == "") {
+                document.getElementById('tb_').value = tb;
+            }
+            else {
+                document.getElementById('tb_').value = parseFloat(tb) * (1 - parseFloat(tb4)) + parseFloat(obj.value) * parseFloat(tb4);
+            }
+        }
+    }
+</script>
+    <style type="text/css">
+  
+.input{text-align:center;
+      
+      width:95%;
+      font-size:15px;
+      height:35px;
+      border:none;
+     
+      } 
+.tr{
+   
+
+     height:40px;
+
+}
+.td{
+   
+     width:145px;
+
+}
+.tdspan
+{
+	
+
+	
+}
+.table
+{
+	
+	border-color:Black;
+	border-width:1px;
+	border-style:solid;
+	border-collapse:collapse;
+}
+</style>
+</head>
+<body>
+    <form name="form1" method="post" action="http://pm.topwisesz.com/Performance/PositionPerformance.aspx?ID=19e11034-d776-425a-9498-c85139873122&amp;IsCheck=1" id="form1">
+<div>
+<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="">
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="">
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="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">
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['form1'];
+if (!theForm) {
+    theForm = document.form1;
+}
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+
+<script type="text/javascript">
+//<![CDATA[
+bind();//]]>
+</script>
+
+<div>
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="1122BAD1">
+</div>
+     <div style=" display:none;">
+       <input onclick="__doPostBack(&#39;btn&#39;,&#39;&#39;)" name="btn" type="button" id="btn" value="刷新">
+     </div>
+     
+     <!-- 右键菜单 -->
+    <div class="contextMenu" id="myMenu1" style="display:none">
+    <ul>
+        <li class="li" id="blank"><img src="./insert.gif"> 空</li>
+        <li class="li" id="insert"><img src="./insert.gif"> 添加数据</li>
+        <li class="li" id="edit"><img src="./enter.gif"> 修改数据</li>
+
+        <li class="li" id="delete"><img src="./delete.gif"> 删除数据</li>
+    </ul>
+    </div>
+    <div>
+       <table border="1" width="100%" class="table" cellpadding="0" cellspacing="0">
+         <tbody><tr class="tr">
+            <td colspan="6" class="tdspan" align="center" style=" font-size:x-large; font-weight:bold;">
+            员工月度考核表
+            </td>
+            
+         </tr>
+          <tr class="tr">
+            <td colspan="2" class="tdspan">
+              部门：<span id="lb_Department">软件运营部</span><input name="tb_ID" type="hidden" id="tb_ID" value="19e11034-d776-425a-9498-c85139873122"></td>
+           
+            <td colspan="2" class="tdspan">
+            被考核岗位：<span id="lb_Position1">应用工程师</span></td>
+            <td colspan="2" class="tdspan">
+            被考核人：<span id="lb_RealName1" style="background-color:Yellow;">黄余毅</span><span id="lb_zz" style="background-color:Yellow;">(试用期)</span></td>
+            
+         </tr>
+          <tr class="tr">
+            <td colspan="2" class="tdspan">
+              考核人：<span id="lb_RealName2">姚川</span></td>
+           
+            <td colspan="2" class="tdspan">
+            考核人岗位：<span id="lb_Position2">软件经理</span></td>
+            <td colspan="2" class="tdspan">
+            考核时间：<span id="lb_Time">2018/1/29 19:44:24</span></td>
+            
+         </tr>
+          <tr class="tr">
+          <td colspan="6" class="tdspan" align="center" style=" font-size:larger;background-color:#47CFFF; font-weight:bold;">
+            月度工作计划
+            </td>
+            
+         </tr>
+          <tr class="tr">
+            <td colspan="6" class="tdspan">
+              <div>
+	<table cellspacing="1" cellpadding="1" rules="all" border="1" id="GridView2" style="border-width:1px;border-style:solid;width:100%;">
+		<tbody><tr>
+			<th align="center" scope="col" style="height:40px;">序号</th><th align="center" scope="col" style="height:40px;">任务名称</th><th align="center" scope="col" style="height:40px;">任务描述</th>
+		</tr><tr>
+			<td align="center" style="height:40px;width:50px;">
+                       1
+                      
+                     </td><td align="left" valign="middle" style="font-size:15px;height:40px;width:150px;">
+                     固定项
+                     
+                     </td><td align="left" valign="middle" style="height:40px;word-break :break-all ; word-wrap:break-word">
+                     
+                       <span id="GridView2_ctl02_lb_TaskDescription" style="font-size:15px;">员工在团队合作、客户导向和自我激励方面的态度和表现</span>
+                     </td>
+		</tr><tr>
+			<td align="center" style="height:40px;width:50px;">
+                       2
+                      
+                     </td><td align="left" valign="middle" style="font-size:15px;height:40px;width:150px;">
+                     编译冷藏室
+                     
+                     </td><td align="left" valign="middle" style="height:40px;word-break :break-all ; word-wrap:break-word">
+                     
+                       <span id="GridView2_ctl03_lb_TaskDescription" style="font-size:15px;">项目初期分到编译冷藏室和双开助手，之后双开用第三方</span>
+                     </td>
+		</tr><tr>
+			<td align="center" style="height:40px;width:50px;">
+                       3
+                      
+                     </td><td align="left" valign="middle" style="font-size:15px;height:40px;width:150px;">
+                     编译运行通话界面
+                     
+                     </td><td align="left" valign="middle" style="height:40px;word-break :break-all ; word-wrap:break-word">
+                     
+                       <span id="GridView2_ctl04_lb_TaskDescription" style="font-size:15px;">通话界面模块InCallUI编译并运行</span>
+                     </td>
+		</tr><tr>
+			<td align="center" style="height:40px;width:50px;">
+                       4
+                      
+                     </td><td align="left" valign="middle" style="font-size:15px;height:40px;width:150px;">
+                     实现内单禁止销售国外功能
+                     
+                     </td><td align="left" valign="middle" style="height:40px;word-break :break-all ; word-wrap:break-word">
+                     
+                       <span id="GridView2_ctl05_lb_TaskDescription" style="font-size:15px;">参考老平台实现禁止销售海外功能</span>
+                     </td>
+		</tr>
+	</tbody></table>
+</div>
+            </td>
+            
+         </tr>
+           <tr class="tr">
+          <td colspan="6" class="tdspan" align="center" style=" font-size:larger;background-color:#47CFFF; font-weight:bold;">
+            月度工作总结<span id="lb1" style="font-size:Small;">（右击下表可添加、修改、删除操作！请先保存再添加）</span></td>
+            
+         </tr>
+          <tr class="tr">
+            <td colspan="6" class="tdspan">
+              <div>
+	<table cellspacing="1" cellpadding="1" rules="all" border="1" id="GridView3" style="border-width:1px;border-style:solid;width:100%;">
+		<tbody><tr>
+			<th align="center" scope="col" style="height:40px;">序号</th><th align="center" scope="col" style="height:40px;">任务名称</th><th align="center" scope="col" style="height:40px;">任务描述</th><th align="center" scope="col" style="height:40px;">完成情况</th>
+		</tr><tr id="28493,f3c0f561-7345-48cd-b9dd-195d672d0c6f,f,P">
+			<td align="center" style="height:40px;width:50px;">
+                       1
+                       <input name="GridView3$ctl02$tb_ID" type="hidden" id="GridView3_ctl02_tb_ID" value="28493">
+                     </td><td align="left" style="font-size:15px;height:40px;width:150px;word-break :break-all ; word-wrap:break-word">
+                      固定项
+                      
+                     </td><td align="left" style="height:40px;width:300px;word-break :break-all ; word-wrap:break-word">
+                     <span id="GridView3_ctl02_lb_TaskDescription" style="font-size:15px;">员工在团队合作、客户导向和自我激励方面的态度和表现</span>
+                    
+                     </td><td align="center" style="height:40px;word-break :break-all ; word-wrap:break-word">
+                     <textarea name="GridView3$ctl02$tb_wcqk" id="GridView3_ctl02_tb_wcqk" style="width:95%;font-size:15px;vertical-align:middle;border:none;text-align:center;" rows="1">态度良好，团队和谐</textarea>
+                      
+                     </td>
+		</tr><tr id="28494,f3c0f561-7345-48cd-b9dd-195d672d0c6f,t,P">
+			<td align="center" style="height:40px;width:50px;">
+                       2
+                       <input name="GridView3$ctl03$tb_ID" type="hidden" id="GridView3_ctl03_tb_ID" value="28494">
+                     </td><td align="left" style="font-size:15px;height:40px;width:150px;word-break :break-all ; word-wrap:break-word">
+                      编译冷藏室
+                      
+                     </td><td align="left" style="height:40px;width:300px;word-break :break-all ; word-wrap:break-word">
+                     <span id="GridView3_ctl03_lb_TaskDescription" style="font-size:15px;">项目初期分到编译冷藏室和双开助手，之后双开用第三方</span>
+                    
+                     </td><td align="center" style="height:40px;word-break :break-all ; word-wrap:break-word">
+                     <textarea name="GridView3$ctl03$tb_wcqk" id="GridView3_ctl03_tb_wcqk" style="width:95%;font-size:15px;vertical-align:middle;border:none;text-align:center;" rows="1">编译通过并运行，不过后期并未分配在我名下</textarea>
+                      
+                     </td>
+		</tr><tr id="28495,f3c0f561-7345-48cd-b9dd-195d672d0c6f,t,P">
+			<td align="center" style="height:40px;width:50px;">
+                       3
+                       <input name="GridView3$ctl04$tb_ID" type="hidden" id="GridView3_ctl04_tb_ID" value="28495">
+                     </td><td align="left" style="font-size:15px;height:40px;width:150px;word-break :break-all ; word-wrap:break-word">
+                      编译运行通话界面
+                      
+                     </td><td align="left" style="height:40px;width:300px;word-break :break-all ; word-wrap:break-word">
+                     <span id="GridView3_ctl04_lb_TaskDescription" style="font-size:15px;">通话界面模块InCallUI编译并运行</span>
+                    
+                     </td><td align="center" style="height:40px;word-break :break-all ; word-wrap:break-word">
+                     <textarea name="GridView3$ctl04$tb_wcqk" id="GridView3_ctl04_tb_wcqk" style=" width:95%;  font-size:15px; vertical-align:middle; border:none; " rows="2">编译通过并运行，已提交代码，后期需要与 CoolMessage 模块配合修改</textarea>
+                      
+                     </td>
+		</tr><tr id="28496,f3c0f561-7345-48cd-b9dd-195d672d0c6f,t,P">
+			<td align="center" style="height:40px;width:50px;">
+                       4
+                       <input name="GridView3$ctl05$tb_ID" type="hidden" id="GridView3_ctl05_tb_ID" value="28496">
+                     </td><td align="left" style="font-size:15px;height:40px;width:150px;word-break :break-all ; word-wrap:break-word">
+                      实现内单禁止销售国外功能
+                      
+                     </td><td align="left" style="height:40px;width:300px;word-break :break-all ; word-wrap:break-word">
+                     <span id="GridView3_ctl05_lb_TaskDescription" style="font-size:15px;">参考老平台实现禁止销售海外功能</span>
+                    
+                     </td><td align="center" style="height:40px;word-break :break-all ; word-wrap:break-word">
+                     <textarea name="GridView3$ctl05$tb_wcqk" id="GridView3_ctl05_tb_wcqk" style="width:95%;font-size:15px;vertical-align:middle;border:none;text-align:center;" rows="1">正在测试验证功能是否实现</textarea>
+                      
+                     </td>
+		</tr>
+	</tbody></table>
+</div>
+              自评（计划完成情况/完成质量/需协助事项等）：<br>
+              <input name="tb_zjID" type="hidden" id="tb_zjID" value="f3c0f561-7345-48cd-b9dd-195d672d0c6f">
+         <textarea name="tb_Self_Comments" rows="2" cols="20" id="tb_Self_Comments" style="height:80px;width:800px;">能按计划及时完成相关任务安排，不懂问题能够及时提出获得团队的帮助</textarea>
+       
+            </td>
+            
+         </tr>
+         <tr class="tr">
+          <td colspan="6" class="tdspan" align="center" style=" font-size:larger;background-color:#47CFFF; font-weight:bold;">
+            工作态度评价
+            </td>
+            
+         </tr>
+         <tr class="tr">
+         <td colspan="6" class="tdspan">
+            S=卓越（110分）、A=优秀（100分）、B=称职（90分）、C=基本称职（70分）、D=不称职（50分）
+            </td>
+            
+         </tr>
+         <tr class="tr">
+            <td class="td" align="center" style="font-weight:bold;">考核维度	
+            </td>
+            <td class="td" align="center">工作主动性</td>
+            <td class="td" align="center">自我工作要求
+            </td>
+            <td class="td" align="center">团队协作意识</td>
+            <td class="td" align="center">工作合理性
+            </td>
+            <td class="td" align="center">工作纪律性</td>
+         </tr>
+         <tr class="tr">
+            <td class="td" align="center" style="font-weight:bold;">评价等级
+            </td>
+            <td class="td" align="center">
+                                          <input name="tb_GZZDX_DJ" type="text" id="tb_GZZDX_DJ" onchange="setscore(this)" class="input" value="A">
+                                        
+            </td>
+            <td class="td" align="center"> <input name="tb_ZWGZYQ_DJ" type="text" id="tb_ZWGZYQ_DJ" onchange="setscore(this)" class="input" value="B">
+            
+            </td>
+            <td class="td" align="center"> <input name="tb_TDXZYS_DJ" type="text" id="tb_TDXZYS_DJ" onchange="setscore(this)" class="input" value="A">
+
+            </td>
+            <td class="td" align="center"> <input name="tb_GZHLX_DJ" type="text" id="tb_GZHLX_DJ" onchange="setscore(this)" class="input" value="B">
+              
+            </td>
+            <td class="td" align="center"><input name="tb_GZJLX_DJ" type="text" id="tb_GZJLX_DJ" onchange="setscore(this)" class="input" value="A">
+
+            </td>
+         </tr>
+         <tr class="tr">
+            <td class="td" align="center" style="font-weight:bold;">各维度得分
+            </td>
+             <td class="td" align="center"> <input name="tb_GZZDX_DF" type="text" id="tb_GZZDX_DF" readonly="readonly" value="100" onchange="score(this)" class="input">
+               
+             </td>
+            <td class="td" align="center"><input name="tb_ZWGZYQ_DF" type="text" id="tb_ZWGZYQ_DF" readonly="readonly" value="90" onchange="score(this)" class="input">
+
+            </td>
+            <td class="td" align="center"><input name="tb_TDXZYS_DF" type="text" id="tb_TDXZYS_DF" readonly="readonly" value="100" onchange="score(this)" class="input">
+            
+            </td>
+            <td class="td" align="center"><input name="tb_GZHLX_DF" type="text" id="tb_GZHLX_DF" readonly="readonly" value="90" onchange="score(this)" class="input">
+                       
+            </td>
+            <td class="td" align="center"><input name="tb_GZJLX_DF" type="text" id="tb_GZJLX_DF" readonly="readonly" value="100" onchange="score(this)" class="input">
+
+            </td>
+           
+         </tr>
+         <tr class="tr">
+            <td class="td" align="center" style="font-weight:bold;">态度考核结果<br>（五项平均）
+            </td>
+           <td class="tdspan" colspan="5" align="center"> <input name="tb_PJDF" type="text" id="tb_PJDF" readonly="readonly" value="96.00" onchange="score(this)" class="input">
+             </td>
+           
+         </tr>
+         <tr class="tr">
+          <td colspan="6" class="tdspan" align="center" style=" font-size:larger; background-color:#47CFFF;font-weight:bold;">
+            工作业绩评价<span id="Label1" style="font-size:Small;">（右击下表可添加、删除操作！！请先保存再添加）</span></td>
+            
+         </tr>
+         <tr class="tr">
+            <td colspan="6" class="tdspan">
+              <div>
+	<table cellspacing="1" cellpadding="1" rules="all" border="1" id="GridView1" style="border-width:1px;border-style:solid;width:100%;">
+		<tbody><tr>
+			<th align="center" scope="col" style="height:40px;">序号</th><th align="center" scope="col" style="height:40px;">指标</th><th align="center" scope="col" style="height:40px;">目标</th><th align="center" scope="col" style="height:40px;">权重</th><th align="center" scope="col" style="height:40px;">完成情况</th><th align="center" scope="col" style="height:40px;">得分</th>
+		</tr><tr id="30065,19e11034-d776-425a-9498-c85139873122,f,E">
+			<td align="center" style="height:40px;width:50px;">
+                       1
+                       <input name="GridView1$ctl02$tb_ID" type="hidden" id="GridView1_ctl02_tb_ID" value="30065">
+                     </td><td align="left" style="height:40px;width:250px;">
+                       <textarea name="GridView1$ctl02$tb_zhibiao" id="GridView1_ctl02_tb_zhibiao" style=" width:95%;  font-size:15px; vertical-align:middle; border:none; " readonly="readonly" rows="1">客户应用开发及时准确性</textarea>
+                    
+                     </td><td align="center" style="height:40px;width:100px;">
+                      <input name="GridView1$ctl02$tb_mubiao" type="text" id="GridView1_ctl02_tb_mubiao" class="input" value="90%" readonly="readonly">
+                     </td><td align="center" style="height:40px;width:60px;">
+                       <input name="GridView1$ctl02$tb_qz" type="text" id="GridView1_ctl02_tb_qz" onchange="weight(this)" class="input" value="35%">
+                     </td><td align="center" style="height:40px;">
+             <textarea name="GridView1$ctl02$tb_wcqk" id="GridView1_ctl02_tb_wcqk" style="width:95%;font-size:15px;vertical-align:middle;border:none;text-align:center;" rows="1">及时完成应用开发要求</textarea>
+                       
+                     </td><td align="center" style="height:40px;width:60px;">
+              
+                       <input name="GridView1$ctl02$tb_df" type="text" id="GridView1_ctl02_tb_df" onchange="score(this)" class="input" value="85.00">
+                     </td>
+		</tr><tr id="30066,19e11034-d776-425a-9498-c85139873122,f,E">
+			<td align="center" style="height:40px;width:50px;">
+                       2
+                       <input name="GridView1$ctl03$tb_ID" type="hidden" id="GridView1_ctl03_tb_ID" value="30066">
+                     </td><td align="left" style="height:40px;width:250px;">
+                       <textarea name="GridView1$ctl03$tb_zhibiao" id="GridView1_ctl03_tb_zhibiao" style=" width:95%;  font-size:15px; vertical-align:middle; border:none; " readonly="readonly" rows="1">平台应用开发及时准确性</textarea>
+                    
+                     </td><td align="center" style="height:40px;width:100px;">
+                      <input name="GridView1$ctl03$tb_mubiao" type="text" id="GridView1_ctl03_tb_mubiao" class="input" value="98%" readonly="readonly">
+                     </td><td align="center" style="height:40px;width:60px;">
+                       <input name="GridView1$ctl03$tb_qz" type="text" id="GridView1_ctl03_tb_qz" onchange="weight(this)" class="input" value="35%">
+                     </td><td align="center" style="height:40px;">
+             <textarea name="GridView1$ctl03$tb_wcqk" id="GridView1_ctl03_tb_wcqk" style="width:95%;font-size:15px;vertical-align:middle;border:none;text-align:center;" rows="1">目前任务已及时完成并提交代码</textarea>
+                       
+                     </td><td align="center" style="height:40px;width:60px;">
+              
+                       <input name="GridView1$ctl03$tb_df" type="text" id="GridView1_ctl03_tb_df" onchange="score(this)" class="input" value="85.00">
+                     </td>
+		</tr><tr id="30067,19e11034-d776-425a-9498-c85139873122,f,E">
+			<td align="center" style="height:40px;width:50px;">
+                       3
+                       <input name="GridView1$ctl04$tb_ID" type="hidden" id="GridView1_ctl04_tb_ID" value="30067">
+                     </td><td align="left" style="height:40px;width:250px;">
+                       <textarea name="GridView1$ctl04$tb_zhibiao" id="GridView1_ctl04_tb_zhibiao" style=" width:95%;  font-size:15px; vertical-align:middle; border:none; " readonly="readonly" rows="1">应用Bug处理及时性</textarea>
+                    
+                     </td><td align="center" style="height:40px;width:100px;">
+                      <input name="GridView1$ctl04$tb_mubiao" type="text" id="GridView1_ctl04_tb_mubiao" class="input" value="100%" readonly="readonly">
+                     </td><td align="center" style="height:40px;width:60px;">
+                       <input name="GridView1$ctl04$tb_qz" type="text" id="GridView1_ctl04_tb_qz" onchange="weight(this)" class="input" value="20%">
+                     </td><td align="center" style="height:40px;">
+             <textarea name="GridView1$ctl04$tb_wcqk" id="GridView1_ctl04_tb_wcqk" style="width:95%;font-size:15px;vertical-align:middle;border:none;text-align:center;" rows="1">目前明显通话模块界面的bug已经完成修改</textarea>
+                       
+                     </td><td align="center" style="height:40px;width:60px;">
+              
+                       <input name="GridView1$ctl04$tb_df" type="text" id="GridView1_ctl04_tb_df" onchange="score(this)" class="input" value="100.00">
+                     </td>
+		</tr><tr id="30068,19e11034-d776-425a-9498-c85139873122,f,E">
+			<td align="center" style="height:40px;width:50px;">
+                       4
+                       <input name="GridView1$ctl05$tb_ID" type="hidden" id="GridView1_ctl05_tb_ID" value="30068">
+                     </td><td align="left" style="height:40px;width:250px;">
+                       <textarea name="GridView1$ctl05$tb_zhibiao" id="GridView1_ctl05_tb_zhibiao" style=" width:95%;  font-size:15px; vertical-align:middle; border:none; " readonly="readonly" rows="1">应用开发准确性</textarea>
+                    
+                     </td><td align="center" style="height:40px;width:100px;">
+                      <input name="GridView1$ctl05$tb_mubiao" type="text" id="GridView1_ctl05_tb_mubiao" class="input" value="无质量事故" readonly="readonly">
+                     </td><td align="center" style="height:40px;width:60px;">
+                       <input name="GridView1$ctl05$tb_qz" type="text" id="GridView1_ctl05_tb_qz" onchange="weight(this)" class="input" value="10%">
+                     </td><td align="center" style="height:40px;">
+             <textarea name="GridView1$ctl05$tb_wcqk" id="GridView1_ctl05_tb_wcqk" style="width:95%;font-size:15px;vertical-align:middle;border:none;text-align:center;" rows="1">能准确完成应用开发</textarea>
+                       
+                     </td><td align="center" style="height:40px;width:60px;">
+              
+                       <input name="GridView1$ctl05$tb_df" type="text" id="GridView1_ctl05_tb_df" onchange="score(this)" class="input" value="89.00">
+                     </td>
+		</tr><tr id="30069,19e11034-d776-425a-9498-c85139873122,f,E">
+			<td align="center" style="height:40px;width:50px;">
+                       5
+                       <input name="GridView1$ctl06$tb_ID" type="hidden" id="GridView1_ctl06_tb_ID" value="30069">
+                     </td><td align="left" style="height:40px;width:250px;">
+                       <textarea name="GridView1$ctl06$tb_zhibiao" id="GridView1_ctl06_tb_zhibiao" style=" width:95%;  font-size:15px; vertical-align:middle; border:none; " readonly="readonly" rows="1">（其他工作任务）</textarea>
+                    
+                     </td><td align="center" style="height:40px;width:100px;">
+                      <input name="GridView1$ctl06$tb_mubiao" type="text" id="GridView1_ctl06_tb_mubiao" class="input" readonly="readonly">
+                     </td><td align="center" style="height:40px;width:60px;">
+                       <input name="GridView1$ctl06$tb_qz" type="text" id="GridView1_ctl06_tb_qz" onchange="weight(this)" class="input" value="0%">
+                     </td><td align="center" style="height:40px;">
+             <textarea name="GridView1$ctl06$tb_wcqk" id="GridView1_ctl06_tb_wcqk" style=" width:95%;  font-size:15px; vertical-align:middle; border:none; " rows="0"></textarea>
+                       
+                     </td><td align="center" style="height:40px;width:60px;">
+              
+                       <input name="GridView1$ctl06$tb_df" type="text" id="GridView1_ctl06_tb_df" onchange="score(this)" class="input" value="0.00">
+                     </td>
+		</tr>
+	</tbody></table>
+</div>
+            </td>
+            
+         </tr>
+         <tr class="tr" style=" height:80px;">
+            <td class="td" align="center" style="font-weight:bold;">业绩考核结果
+            </td>
+            <td colspan="5" class="tdspan" align="center">
+              【员工月度考核得分】
+              <br>
+                <br>
+              ∑（各指标得分*指标权重）=&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              
+                <input name="lb_df" type="text" id="lb_df" readonly="readonly" value="88.40" style=" border-bottom-width:1px; text-align:center; width:50px; font-size:15px;border-left:none; border-bottom-color:#808080; border-right:none; border-top:none;">
+            </td>
+            
+         </tr>
+          <tr class="tr">
+          <td colspan="6" class="tdspan" align="center" style=" font-size:larger; background-color:#47CFFF; font-weight:bold;">
+            部门内考核最终得分
+            </td>
+            
+         </tr>
+          <tr class="tr">
+          <td colspan="6" class="tdspan" align="center" style=" font-weight:bold; color:#7030A0;">
+            业绩考核分数 * 80% + 态度考核分数 * 20% =&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+         
+            <input name="lb_zzdf" type="text" id="lb_zzdf" readonly="readonly" value="89.92" style=" border-bottom-width:1px; text-align:center; width:50px; font-size:15px;border-left:none; border-bottom-color:#808080; border-right:none; border-top:none;">
+            </td>
+            
+         </tr>
+         
+           <tr class="tr" style=" height:80px;">
+            <td class="td" align="center" style="font-weight:bold;">上级评语
+            </td>
+            <td colspan="5" class="tdspan" align="center">
+             
+                  <textarea name="tb_SJPY" id="tb_SJPY" style=" width:95%; height:90%;  font-size:15px; vertical-align:middle; border:none; ">能力不错，继续努力</textarea>
+                  <br>
+                  <span id="lb_SJPY" style="color:Red;"></span>
+            </td>
+            
+         </tr>
+          <tr class="tr">
+          <td colspan="6" class="tdspan" align="center" style=" font-size:larger; background-color:#47CFFF; font-weight:bold;">
+            项目负责人评价
+            </td>
+            
+         </tr>
+          <tr class="tr">
+          <td colspan="6" class="tdspan" valign="middle">
+            <table border="0" cellpadding="0" width="100%" cellspacing="0">
+               <tbody><tr style="height:40px;">
+                  <td style=" width:50%;" align="center">项目负责人：<select name="DDL_ProjectUser" id="DDL_ProjectUser" disabled="disabled" style="height:30px;width:150px;">
+	<option selected="selected" value="1">未设置</option>
+	<option value="1354">曹华军</option>
+	<option value="1055">陈超军</option>
+	<option value="1659">陈纯</option>
+	<option value="1347">陈德铭</option>
+	<option value="1343">邓志新</option>
+	<option value="1576">段隆冬</option>
+	<option value="1641">冯楷</option>
+	<option value="567">付少丽</option>
+	<option value="1346">郭海燕</option>
+	<option value="1732">贺攀璐</option>
+	<option value="1125">胡莉萍</option>
+	<option value="1724">黄荣湘</option>
+	<option value="1351">李树东</option>
+	<option value="1362">李文</option>
+	<option value="721">李向杨</option>
+	<option value="8">罗先清</option>
+	<option value="1345">唐耀明</option>
+	<option value="1726">王振</option>
+	<option value="1163">吴健成</option>
+	<option value="1486">吴宇辉</option>
+	<option value="9">谢祝新</option>
+	<option value="1200">徐雪林</option>
+	<option value="1199">姚欣武</option>
+	<option value="1198">叶方雨</option>
+	<option value="1300">叶晓丽</option>
+	<option value="339">游雨清</option>
+	<option value="20">曾绝文</option>
+	<option value="59">曾伟德</option>
+	<option value="1117">曾治东</option>
+	<option value="1267">张海梅</option>
+	<option value="467">张艳</option>
+	<option value="1041">郑剑锋</option>
+
+</select>
+                  </td>
+                  <td style=" width:50%;" align="center">
+                     评价分数：   <input name="tb_pjfs" type="text" id="tb_pjfs" onchange="pjfs(this)" style="border-bottom-width:1px; text-align:center; border-left:none; border-bottom-color:#808080; border-right:none; border-top:none; font-size:15px; height:30px; width:100px;" disabled="disabled">
+                  </td>
+                 
+               </tr>
+              
+            </tbody></table>
+                                                            
+            </td>
+            
+         </tr>
+         <tr class="tr">
+          <td colspan="6" class="tdspan" align="center" style=" font-size:larger; background-color:#47CFFF; font-weight:bold;">
+            个人最终考核得分<br><font style=" font-size:10px; color:Gray;">(如项目负责人即为上级或项目评分没填写，则部门评分占100%。)</font>
+            </td>
+            
+         </tr>
+          <tr class="tr">
+          <td colspan="6" class="tdspan" align="center" style=" font-weight:bold; color:#7030A0;">
+           <span id="lb_">部门内评价分数*60%+项目负责人评价*40%=</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+            <input name="tb_" type="text" id="tb_" readonly="readonly" value="89.92" style=" border-bottom-width:1px; text-align:center; width:50px; font-size:15px;border-left:none; border-bottom-color:#808080; border-right:none; border-top:none;">
+            <input name="tb_4" type="hidden" id="tb_4" value="0.4">
+            </td>
+            
+         </tr>
+          <tr class="tr">
+          <td colspan="6" class="tdspan" style="height:80px;" valign="middle">
+            <table border="0" cellpadding="0" width="100%" cellspacing="0">
+               <tbody><tr style="height:40px;">
+                  <td align="left">考核人签名：<span id="lb_KHRQM">姚川</span></td>
+                  <td align="left">被考核人签名：<span id="lb_BKHRQM"></span></td>
+                  <td>&nbsp;</td>
+               </tr>
+               <tr>
+                   <td colspan="3" align="right">日期：<span id="lb_Y" style="text-decoration:underline;">&nbsp;&nbsp;2018&nbsp;&nbsp;</span>年<span id="lb_M" style="text-decoration:underline;">&nbsp;&nbsp;1&nbsp;&nbsp;</span>月</td>
+                  
+               </tr>
+            </tbody></table>
+                                                            
+            </td>
+            
+         </tr>
+          <tr class="tr">
+          <td colspan="6" class="tdspan" align="left" style="font-weight:bold; font-size:small;">
+            注：1、项目经理将对各项目组成员进行考核，并按 40% 比例加权。
+            <br>
+              2、绩效考核是为了提升全员绩效，如对绩效评价过程有疑问，可向部门负责人和人力资源部咨询。
+            </td>
+            
+         </tr>
+        
+       </tbody></table>
+       <br>
+       <table border="0" cellpadding="0" cellspacing="0" width="100%">
+          <tbody><tr>
+             <td align="center">
+
+                
+                 <input type="submit" name="btn_qr" value="确认签名" id="btn_qr" style="height:35px;width:60px;">
+                 <div style="display:none;"> 
+                 <input onclick="__doPostBack(&#39;btn_save2&#39;,&#39;&#39;)" name="btn_save2" type="button" id="btn_save2" value="保存">
+                 </div>
+             </td>
+          </tr>
+       </tbody></table>
+    </div>
+    </form><div id="jqContextMenu" style="display: none; position: absolute; z-index: 500;"></div><div style="background-color: rgb(0, 0, 0); position: absolute; opacity: 0.2; z-index: 499; display: none;"></div>
+
+<script type="text/javascript" language="javascript">
+    $(document).ready(function() {
+
+        bind();
+
+    });
+    
+    </script>
+
+</body></html>
